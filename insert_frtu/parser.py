@@ -1,5 +1,8 @@
 from ConfigParser import SafeConfigParser
 
+_MAX_UNCOVERED_SMART_METER = 'max_uncovered_smart_meters'
+_MAX_ACCUMULATIVE_PROBABILITY = 'max_accumulative_probability'
+
 
 def _build_conf():
     parser = SafeConfigParser()
@@ -15,4 +18,7 @@ def _build_conf():
 
     return typed_dict
 
-conf = _build_conf()
+
+_conf = _build_conf()
+max_uncovered_smart_meters = _conf[_MAX_UNCOVERED_SMART_METER]
+max_accumulative_probability = _conf[_MAX_ACCUMULATIVE_PROBABILITY]

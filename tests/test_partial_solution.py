@@ -43,6 +43,14 @@ class TestPartialSolution(unittest.TestCase):
 
     def compare_partial_solution(self, solution, number_uncovered_smart_meter, accumulative_probability, frtu_list):
         assert solution.frtu_list == frtu_list
-        assert solution.accumulative_probability == accumulative_probability
+        assert solution._accumulative_probability == accumulative_probability
         assert solution.number_uncovered_smart_meter == number_uncovered_smart_meter
         assert solution.number_frtu == len(frtu_list)
+
+    def test_inferior(self):
+        benchmark = PartialSolution(5, (0.5, 0.7), (1, 2, 3))
+        not_inferior = PartialSolution(5, (0.5, 0.6), (1, 2, 3, 4))
+        inferior = PartialSolution(6, (0.5, 0.7), (1, 2, 3, 4))
+
+        assert not not_inferior.is_inferior_to(benchmark)
+        assert inferior.is_inferior_to(benchmark)
