@@ -8,13 +8,24 @@ _MAX_ACCUMULATIVE_PROBABILITY = 'max_accumulative_probability'
 _MAX_TREE_BRANCHES = 2
 
 
+def read_probability_file(file_name):
+    leaf_probability = {}
+    with open(file_name) as file:
+        for line in file:
+            if not re.match(r'\w+(\s+\d*[.]?\d+){2}', line):
+                continue
+            leaf, lower_bound, upper_bound = line.split()
+            leaf_probability[leaf] = sorted(map(float, [lower_bound, upper_bound]))
+    return leaf_probability
+
+
 def read_tree_file(file_name):
     graph = {}
     with open(file_name) as file:
         for line in file:
-            if not re.match(r'\d+\s+\d+', line):
+            if not re.match(r'\w+\s+\w+', line):
                 continue
-            source, sink = map(int, line.split())
+            source, sink = line.split()
             graph.setdefault(source, set()).add(sink)
     validate_tree(graph)
     return graph, to_parent(graph)
@@ -43,13 +54,6 @@ def validate_tree(graph):
     roots = filter(lambda node: union_find[node] == node, union_find)
     if len(roots) is not 1:
         raise ValueError('Tree has multiple roots: {0}'.format(roots))
-
-"""UnionFind.py
-
-Union-find data structure. Based on Josiah Carlson's code,
-http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/215912
-with significant additional changes by D. Eppstein.
-"""
 
 
 class _UnionFind:
@@ -102,7 +106,7 @@ class _UnionFind:
     def union(self, *objects):
         """Find the sets containing the objects and merge them all."""
         roots = [self[x] for x in objects]
-        heaviest = max([(self.weights[r],r) for r in roots])[1]
+        heaviest = max([(self.weights[r], r) for r in roots])[1]
         for r in roots:
             if r != heaviest:
                 self.weights[heaviest] += self.weights[r]
@@ -127,4 +131,3 @@ def _build_conf():
 _conf = _build_conf()
 max_uncovered_smart_meters = _conf[_MAX_UNCOVERED_SMART_METER]
 max_accumulative_probability = _conf[_MAX_ACCUMULATIVE_PROBABILITY]
-
