@@ -28,7 +28,6 @@ class TestAlgorithm(unittest.TestCase):
         assert filtered_solutions == [one_frtu, two_frtu]
 
     def test_bottom_up_number_of_uncovered_leaves(self):
-        # so it is supposed to add FRTU at 1, instead of 2
         self.leaf_probability[5] = 0.1
         solutions = self.algorithm.bottom_up()
         solutions = sorted(solutions, key=lambda solution: solution.number_frtu)
