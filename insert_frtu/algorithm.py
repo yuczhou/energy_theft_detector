@@ -50,3 +50,7 @@ def _filter_inferior(solutions):
         if not filter(lambda benchmark: candidate.is_inferior_to(benchmark), solutions[:candidate_index]):
             filtered_solutions.append(candidate)
     return filtered_solutions
+
+
+if __name__ == '__main__':
+    pass
