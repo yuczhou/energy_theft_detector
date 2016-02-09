@@ -1,8 +1,10 @@
+import logging
 from itertools import chain, product
 
 import parser as params
-
 from partial_solution import PartialSolution
+
+logger = logging.getLogger(__name__)
 
 
 class Algorithm(object):
@@ -16,7 +18,7 @@ class Algorithm(object):
     def _bottom_up(self, node):
         if node not in self._to_child or not self._to_child[node]:
             if node not in self._leaf_probability:
-                raise ValueError('Node %s is a leaf with no attacking probability.' % node)
+                raise ValueError('Node {0} is a leaf with no attacking probability.'.format(node))
             probability = self._leaf_probability[node]
             return [PartialSolution(number_uncovered_smart_meter=1,
                                     accumulative_probability=probability if hasattr(probability, '__iter__')
@@ -32,6 +34,8 @@ class Algorithm(object):
     def _child_solutions(self, node):
         left_solutions = self._bottom_up(self._to_child[node][0]) if len(self._to_child[node]) >= 1 else []
         right_solutions = self._bottom_up(self._to_child[node][1]) if len(self._to_child[node]) >= 2 else []
+        logger.debug('At node {0}, left solutions are: {1}'.format(node, '; '.join(map(str, left_solutions))))
+        logger.debug('At node {0}, right solutions are: {1}'.format(node, '; '.join(map(str, right_solutions))))
         # merge partial solutions from left and right sub-trees
         if not left_solutions:
             return right_solutions
@@ -50,7 +54,3 @@ def _filter_inferior(solutions):
         if not filter(lambda benchmark: candidate.is_inferior_to(benchmark), solutions[:candidate_index]):
             filtered_solutions.append(candidate)
     return filtered_solutions
-
-
-if __name__ == '__main__':
-    pass

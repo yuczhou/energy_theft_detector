@@ -26,7 +26,7 @@ def read_tree_file(file_name):
             if not re.match(r'\w+\s+\w+', line):
                 continue
             source, sink = line.split()
-            graph.setdefault(source, set()).add(sink)
+            graph.setdefault(source, []).append(sink)
     validate_tree(graph)
     return graph, to_parent(graph)
 

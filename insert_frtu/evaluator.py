@@ -1,7 +1,10 @@
 import random
+import logging
 from itertools import groupby
 
 _MONTE_CARLO_SAMPLE_SIZE = 1000
+
+logger = logging.getLogger(__name__)
 
 
 class SolutionEvaluator(object):
@@ -13,7 +16,10 @@ class SolutionEvaluator(object):
         for number_frtus, level_solutions in groupby(solutions, key=lambda solution: solution.number_frtu):
             evals = {solution: self._single_evaluator.evaluate(solution.frtu_list)
                      for solution in list(level_solutions)}
-            optimal_solutions_each_level[number_frtus] = min(evals.items(), key=lambda pair: pair[1])
+            frtus, average_leaves = min(evals.items(), key=lambda pair: pair[1])
+            optimal_solutions_each_level[number_frtus] = (frtus, average_leaves)
+            logger.info('Optimal solution with {0} FRTUs: {1}. Avg. smart meters to check: {2}'
+                        .format(number_frtus, frtus, average_leaves))
         return optimal_solutions_each_level
 
 

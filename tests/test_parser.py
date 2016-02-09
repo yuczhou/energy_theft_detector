@@ -24,9 +24,9 @@ class TestParser(unittest.TestCase):
         to_children, to_parent = read_tree_file(self._file.name)
         assert to_parent == {'2':'1', '3':'1', '4':'2'}
         assert '1' in to_children
-        assert to_children['1'] == {'2', '3'}
+        assert to_children['1'] == ['2', '3']
         assert '2' in to_children
-        assert to_children['2'] == {'4'}
+        assert to_children['2'] == ['4']
 
     def test_read_graph_cylic_tree(self):
         self._file.writelines(['1 2\n', '1 3\n', '2 3\n'])
