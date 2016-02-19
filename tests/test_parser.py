@@ -21,7 +21,8 @@ class TestParser(unittest.TestCase):
         self._file.writelines(['1 2\n', '1 3\n', '2 4\n'])
         self._file.seek(0)
 
-        to_children, to_parent = read_tree_file(self._file.name)
+        root, to_children, to_parent = read_tree_file(self._file.name)
+        assert root == '1'
         assert to_parent == {'2':'1', '3':'1', '4':'2'}
         assert '1' in to_children
         assert to_children['1'] == ['2', '3']

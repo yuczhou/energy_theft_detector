@@ -28,7 +28,15 @@ def read_tree_file(file_name):
             source, sink = line.split()
             graph.setdefault(source, []).append(sink)
     validate_tree(graph)
-    return graph, to_parent(graph)
+    to_parent_map = to_parent(graph)
+    return find_root(to_parent_map), graph, to_parent_map
+
+
+def find_root(to_parent_map):
+    node = to_parent_map.keys().pop()
+    while node in to_parent_map:
+        node = to_parent_map[node]
+    return node
 
 
 def to_parent(to_children):
