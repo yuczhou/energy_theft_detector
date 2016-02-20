@@ -3,7 +3,7 @@ import random
 
 import sys
 
-_BRANCH_LEAVES_RANGE = (4, 8)
+_BRANCH_LEAVES_RANGE = (18, 24)
 _PROBABILITY_RANGES = [(0.0, 0.1)] * 4 + [(0.5, 0.6)]
 _TOTAL_LEAVES = 1000
 _DELIMITER = '_'
