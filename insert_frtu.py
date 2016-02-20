@@ -29,9 +29,9 @@ def main(argv):
     if not os.path.isfile(probability_file):
         raise 'Probability file {0} does not exist'.format(probability_file)
 
-    to_child, to_parent = parser.read_tree_file(tree_structure_file)
+    root, to_child, to_parent = parser.read_tree_file(tree_structure_file)
     leaf_probability = parser.read_probability_file(probability_file)
-    solutions = algorithm.Algorithm('0', to_child, leaf_probability).bottom_up()
+    solutions = algorithm.Algorithm(root, to_child).top_down()
     SolutionEvaluator(to_parent, leaf_probability).evaluate(solutions)
 
 
