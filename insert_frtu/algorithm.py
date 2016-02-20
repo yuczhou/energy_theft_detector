@@ -1,56 +1,41 @@
 import logging
-from itertools import chain, product
-
-import parser as params
-from partial_solution import PartialSolution
+from itertools import islice
+import parser as conf
 
 logger = logging.getLogger(__name__)
 
 
 class Algorithm(object):
-    def __init__(self, root, to_child, leaf_probability):
-        self._root, self._to_child, self._leaf_probability = root, to_child, leaf_probability
-        self._partial_solutions = {}
+    def __init__(self, root, to_child):
+        self._root, self._to_child = root, to_child
 
-    def bottom_up(self):
-        return self._bottom_up(self._root)
+    def top_down(self):
+        frtu_list = []
+        backbone_nodes = self._build_backbone()
+        for branch_root in backbone_nodes:
+            branch_nodes = []
+            while branch_root is not None and (branch_root in self._to_child):
+                branch_nodes.append(branch_root)
+                candidates = [candidate for candidate in self._to_child[branch_root]
+                              if candidate in self._to_child and candidate not in backbone_nodes]
+                branch_root = candidates[-1] if len(candidates) != 0 else None
+            frtu_list += list(islice(branch_nodes, 1, None, conf.max_uncovered_smart_meters))
+        return frtu_list
 
-    def _bottom_up(self, node):
-        if node not in self._to_child or not self._to_child[node]:
-            if node not in self._leaf_probability:
-                raise ValueError('Node {0} is a leaf with no attacking probability.'.format(node))
-            probability = self._leaf_probability[node]
-            return [PartialSolution(number_uncovered_smart_meter=1,
-                                    accumulative_probability=probability if hasattr(probability, '__iter__')
-                                    else (probability, probability))]
-        solutions = filter(lambda raw: raw.number_uncovered_smart_meter <= params.max_uncovered_smart_meters,
-                           self._child_solutions(node))
-        # add FRTU at the root to create new partial solutions
-        solutions += [PartialSolution(accumulative_probability=(0, 0), frtu_list=chain(solution.frtu_list, [node]))
-                      for solution in solutions]
-        # filter inferior solutions
-        return _filter_inferior(solutions)
+    def _build_backbone(self):
+        backbone_nodes = []
+        branch_root = self._root
+        while branch_root is not None:
+            if branch_root not in self._to_child:
+                raise ValueError('Branch root {0} does not exist in the graph.'.format(branch_root))
+            backbone_nodes.append(branch_root)
+            next_branch_root = None
+            for branch_candidate in self._to_child[branch_root]:
+                next_branch_root = branch_candidate if self._is_on_back_bone(branch_candidate) else None
+            branch_root = next_branch_root
+        return backbone_nodes
 
-    def _child_solutions(self, node):
-        left_solutions = self._bottom_up(self._to_child[node][0]) if len(self._to_child[node]) >= 1 else []
-        right_solutions = self._bottom_up(self._to_child[node][1]) if len(self._to_child[node]) >= 2 else []
-        logger.debug('At node {0}, left solutions are: {1}'.format(node, '; '.join(map(str, left_solutions))))
-        logger.debug('At node {0}, right solutions are: {1}'.format(node, '; '.join(map(str, right_solutions))))
-        # merge partial solutions from left and right sub-trees
-        if not left_solutions:
-            return right_solutions
-        elif not right_solutions:
-            return left_solutions
-        return [left + right for left, right in product(left_solutions, right_solutions)]
-
-
-def _filter_inferior(solutions):
-    solutions = sorted(filter(lambda solution: solution.is_valid(), solutions),
-                       key=lambda solution: (solution.number_frtu,
-                                             solution.number_uncovered_smart_meter,
-                                             solution.mean_probability))
-    filtered_solutions = []
-    for candidate_index, candidate in enumerate(solutions):
-        if not filter(lambda benchmark: candidate.is_inferior_to(benchmark), solutions[:candidate_index]):
-            filtered_solutions.append(candidate)
-    return filtered_solutions
+    def _is_on_back_bone(self, candidate):
+        if candidate not in self._to_child:
+            return False
+        return all([neighbor in self._to_child for neighbor in self._to_child[candidate]])

@@ -1,47 +1,19 @@
 import unittest
 import algorithm
-from partial_solution import PartialSolution
+import parser as conf
 
 
 class TestAlgorithm(unittest.TestCase):
     def setUp(self):
-        """
-            ------0------
-           /             \
-           1             2
-          / \           / \
-          3 |           4 |
-         /| |          /| |
-        5 6 7         8 9 10
-        """
-        self.to_child = {0: [1, 2], 1: [3, 7], 3: [5, 6], 2: [4, 10], 4: [8, 9]}
-        self.leaf_probability = {leaf: 0 for leaf in [5, 6, 7, 8, 9, 10]}
-        self.algorithm = algorithm.Algorithm(0, self.to_child, self.leaf_probability)
+        self.to_child = {1: [2, 8], 2: [3, 5], 3: [4, 6], 4: [7], 8: [9], 9: [10, 11], 10: [12]}
+        self.algorithm = algorithm.Algorithm(1, self.to_child)
 
-    def test_filter_inferior(self):
-        one_frtu = PartialSolution(5, (0.1, 0.2), (1,))
-        one_frtu_inferior = PartialSolution(5, (0.1, 0.3), (1,))
-        two_frtu = PartialSolution(3, (0.2, 0.3), (1, 2))
-        two_frtu_inferior = PartialSolution(4, (0.2, 0.3), (1, 2))
-        filtered_solutions = algorithm._filter_inferior([two_frtu_inferior, one_frtu_inferior, two_frtu, one_frtu])
+    def test_build_backbone(self):
+        assert [1, 8] == self.algorithm._build_backbone()
 
-        assert filtered_solutions == [one_frtu, two_frtu]
-
-    def test_bottom_up_number_of_uncovered_leaves(self):
-        self.leaf_probability[5] = 0.1
-        solutions = self.algorithm.bottom_up()
-        solutions = sorted(solutions, key=lambda solution: solution.number_frtu)
-
-        assert len(solutions) == 2
-        assert solutions[0] == PartialSolution(3, (0, 0), [1])
-        assert solutions[1] == PartialSolution(0, (0, 0), [1, 2])
-
-    def test_bottom_up_accumulative_probability(self):
-        map(lambda key: self.leaf_probability.update({key: 0.5}), self.leaf_probability.keys())
-        solutions = self.algorithm.bottom_up()
-
-        assert len(solutions) == 1
-        assert solutions[0] == PartialSolution(0, (0, 0), [1, 2, 3, 4])
+    def test_top_down(self):
+        conf.max_uncovered_smart_meters = 2
+        assert [2, 4, 9] == self.algorithm.top_down()
 
 
 if __name__ == '__main__':
